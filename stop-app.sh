@@ -57,7 +57,7 @@ done
 
 # Check for running containers
 check_containers() {
-  local running_services=$(docker-compose ps --services --filter "status=running" 2>/dev/null)
+  local running_services=$(docker compose ps --services --filter "status=running" 2>/dev/null)
   
   if [ -z "$running_services" ]; then
     echo "No containers are currently running."
@@ -110,7 +110,7 @@ fi
 # Perform stop operation based on options
 if [ "$CLEAN_ALL" = true ]; then
   echo "🔄 Performing complete cleanup..."
-  docker-compose down -v --remove-orphans
+  docker compose down -v --remove-orphans
   
   # Remove images
   echo "🗑️  Removing images..."
@@ -129,7 +129,7 @@ if [ "$CLEAN_ALL" = true ]; then
   
 elif [ "$REMOVE_VOLUMES" = true ] && [ "$REMOVE_IMAGES" = true ]; then
   echo "🔄 Stopping containers, removing volumes and images..."
-  docker-compose down -v --remove-orphans
+  docker compose down -v --remove-orphans
   
   echo "🗑️  Removing images..."
   docker rmi ai_agents_hospitality-api bookings-db-data-loader postgres:15.3 2>/dev/null || true
@@ -139,7 +139,7 @@ elif [ "$REMOVE_VOLUMES" = true ] && [ "$REMOVE_IMAGES" = true ]; then
   
 elif [ "$REMOVE_VOLUMES" = true ]; then
   echo "🔄 Stopping containers and removing volumes..."
-  docker-compose down -v --remove-orphans
+  docker compose down -v --remove-orphans
   
   echo ""
   echo "⚠️  WARNING: All database data has been removed!"
@@ -147,7 +147,7 @@ elif [ "$REMOVE_VOLUMES" = true ]; then
   
 elif [ "$REMOVE_IMAGES" = true ]; then
   echo "🔄 Stopping containers and removing images..."
-  docker-compose down --remove-orphans
+  docker compose down --remove-orphans
   
   echo "🗑️  Removing images..."
   docker rmi ai_agents_hospitality-api bookings-db-data-loader postgres:15.3 2>/dev/null || true
@@ -157,7 +157,7 @@ elif [ "$REMOVE_IMAGES" = true ]; then
   
 else
   echo "🛑 Stopping containers (keeping volumes)..."
-  docker-compose down --remove-orphans
+  docker compose down --remove-orphans
   
   echo ""
   echo "✅ Containers stopped successfully!"
@@ -167,7 +167,7 @@ fi
 # Show final status
 echo ""
 echo "📊 Final Status:"
-docker-compose ps
+docker compose ps
 echo ""
 
 echo "=================================================================="

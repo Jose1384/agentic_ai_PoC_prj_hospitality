@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Change to the prj-docker-compose directory where docker-compose.yaml is located
+# Change to the prj-docker-compose directory where docker compose.yaml is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR/prj-docker-compose" || { echo "Error: Cannot change to prj-docker-compose directory"; exit 1; }
+cd "$SCRIPT_DIR/prj-docker-compose" || { echo "Error: Cannot change to prj-docker compose directory"; exit 1; }
 
 # Function to check if containers are running
 check_running_containers() {
-  # Check for running containers from docker-compose.yaml
-  local running_services=$(docker-compose ps --services --filter "status=running" 2>/dev/null)
+  # Check for running containers from docker compose.yaml
+  local running_services=$(docker compose ps --services --filter "status=running" 2>/dev/null)
   local running_containers=0
   
   if [ -n "$running_services" ]; then
@@ -15,7 +15,7 @@ check_running_containers() {
   fi
   
   if [ "$running_containers" -gt 0 ]; then
-    echo "WARNING: There are already $running_containers containers running from this docker-compose configuration."
+    echo "WARNING: There are already $running_containers containers running from this docker compose configuration."
     echo "Running containers:"
     echo "$running_services"
     
@@ -117,8 +117,8 @@ show_help() {
   echo ""
   echo "Options:"
   echo "  --logs, -l         : Capture logs continuously in the background"
-  echo "  --buildnocache, -bn: Execute docker-compose up with --build --no-cache"
-  echo "  --build, -b        : Execute docker-compose up with --build (uses cache)"
+  echo "  --buildnocache, -bn: Execute docker compose up with --build --no-cache"
+  echo "  --build, -b        : Execute docker compose up with --build (uses cache)"
   echo "  --no_ai_agent, -na : Don't start the ai_agents api service, i.e. for debug purposes"
   echo "  --force, -f        : Force execution even if containers are already running (USE WITH CAUTION)"
   echo "  --help, -h         : Show this help message"
@@ -184,7 +184,7 @@ if [ "$CAPTURE_LOGS" = true ]; then
 
   # Display relative path to user
   REL_LOG_FILE="logs/$(basename "$LOG_FILE")"
-  echo "Starting docker-compose. Logs will be saved in: $REL_LOG_FILE"
+  echo "Starting docker compose. Logs will be saved in: $REL_LOG_FILE"
 
   # Limit old log files (keep only the 10 most recent)
   cleanup_old_logs() {
@@ -196,17 +196,17 @@ if [ "$CAPTURE_LOGS" = true ]; then
   cleanup_old_logs
 fi
 
-# Configure docker-compose command according to parameters
+# Configure docker compose command according to parameters
 if [ "$BUILD_NOCACHE" = true ]; then
   echo "Building containers without cache..."
-  docker-compose build --no-cache
-  docker-compose up -d
+  docker compose build --no-cache
+  docker compose up -d
 elif [ -n "$BUILD_FLAG" ]; then
   echo "Building containers with cache..."
-  docker-compose up -d --build
+  docker compose up -d --build
 else
   echo "Starting containers..."
-  docker-compose up -d
+  docker compose up -d
 fi
 
 # Only work with logs if the parameter was specified
@@ -247,8 +247,8 @@ if [ "$CAPTURE_LOGS" = true ]; then
   # Save the PID in a file to be able to stop it later
   (
     # Capture logs in the background
-    # Redirect stderr to /dev/null to suppress threading errors from old docker-compose versions
-    docker-compose logs -f 2>/dev/null | while IFS= read -r line; do
+    # Redirect stderr to /dev/null to suppress threading errors from old docker compose versions
+    docker compose logs -f 2>/dev/null | while IFS= read -r line; do
       echo "$line" >> "$LOG_FILE"
       
       # Check file size and rotate if necessary
@@ -270,7 +270,7 @@ fi
 # Don't start the ai_agents api service if the parameter was specified
 if [ "$NO_AI_AGENT" = true ]; then
   echo "The ai_agents api service will not be started."
-  docker-compose stop ai_agents api
+  docker compose stop ai_agents api
 fi
 
 # Display application URLs and service information
@@ -294,7 +294,7 @@ echo "   User: ${POSTGRES_USER:-postgres}"
 
 echo ""
 echo "📊 Container Status:"
-docker-compose ps
+docker compose ps
 
 # Check service health
 check_service_health
