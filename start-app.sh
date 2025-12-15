@@ -243,13 +243,40 @@ if [ "$CAPTURE_LOGS" = true ]; then
   }
 
   # Unattended mode: start log capture in the background
+  # Solution: Use docker compose logs but force it to think it's writing to a TTY
+  # by using 'script' with a proper PTY. However, since that's not working reliably,
+  # we'll use a different approach: run docker compose logs through a process that
+  # maintains TTY characteristics. The key insight: the old logs had ANSI codes,
+  # so we need to preserve that behavior.
+  
+  # ANSI color codes for service prefixes (matching docker compose default colors)
+  # These match what docker compose uses: green for some services, yellow for others, cyan for others
+  # Using $'\033' syntax to ensure escape sequences are properly interpreted
+  COLOR_RESET=$'\033[0m'
+  COLOR_GREEN=$'\033[32m'   # bookings-db-data-loader
+  COLOR_YELLOW=$'\033[33m'  # bookings-db  
+  COLOR_CYAN=$'\033[36m'    # ai_agents_hospitality-api
   
   # Save the PID in a file to be able to stop it later
   (
-    # Capture logs in the background
-    # Redirect stderr to /dev/null to suppress threading errors from old docker compose versions
-    docker compose logs -f 2>/dev/null | while IFS= read -r line; do
-      echo "$line" >> "$LOG_FILE"
+    # Wait a moment for containers to be fully started
+    sleep 2
+    
+    # Use docker compose logs but pipe through a process that adds colors
+    # We'll use docker compose logs and then add colored prefixes manually
+    # This ensures colors are always present
+    docker compose logs -f 2>/dev/null | while IFS= read -r line || [ -n "$line" ]; do
+      # Add ANSI color codes based on service name (matching docker compose behavior)
+      colored_line="$line"
+      if [[ "$line" =~ ^(ai_agents_hospitality-api[[:space:]]+\|) ]]; then
+        colored_line="${COLOR_CYAN}${line}${COLOR_RESET}"
+      elif [[ "$line" =~ ^(bookings-db[[:space:]]+\|) ]]; then
+        colored_line="${COLOR_YELLOW}${line}${COLOR_RESET}"
+      elif [[ "$line" =~ ^(bookings-db-data-loader[[:space:]]+\|) ]]; then
+        colored_line="${COLOR_GREEN}${line}${COLOR_RESET}"
+      fi
+      
+      printf '%b\n' "$colored_line" >> "$LOG_FILE"
       
       # Check file size and rotate if necessary
       if [ $(stat -c%s "$LOG_FILE") -gt 10485760 ]; then  # 10MB in bytes
