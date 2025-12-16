@@ -18,7 +18,7 @@
     // Usa variable de entorno ${env:HOME} para hacer la ruta más portable
     // También puedes definir VENV_PATH en tu .env o como variable de entorno del sistema
     "python.defaultInterpreterPath": "${env:VENV_BASE_PATH}/udacity_langchain_ndg/bin/python",
-    dssasdA
+
     // Alternativa: Si defines VENV_PATH en tu .env o como variable de entorno del sistema:
     // "python.defaultInterpreterPath": "${env:VENV_PATH}/bin/python",
     

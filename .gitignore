@@ -70,7 +70,7 @@ out/
 *.vsixmanifest
 .vscode-test/
 .vscode/extensions.json
-#.vscode/settings.json
+.vscode/settings.json
 .vscode/tasks.json
 .vscode/launch.json
 .vscode/extensions.json
@@ -115,3 +115,4 @@ doctrees/
 
 # Project specific
 logs/
+**/output_files/**
