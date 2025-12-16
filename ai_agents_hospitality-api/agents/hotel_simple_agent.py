@@ -35,7 +35,7 @@ except ImportError:
 
 from util.configuration import PROJECT_ROOT
 from util.logger_config import logger
-from config.agent_config import get_agent_config
+from config.agent_config import _load_config_file, get_agent_config
 
 # Path to hotel data files (relative to project root)
 # First try local data directory (for Docker), then fallback to bookings-db
@@ -51,13 +51,25 @@ def _get_hotels_data_path():
     Returns:
         Path: Path to the hotels data directory
     """
-    if HOTELS_DATA_PATH_LOCAL.exists() and (HOTELS_DATA_PATH_LOCAL / "hotels.json").exists():
+    config = _load_config_file()
+    local = config.get("hotels", {}).get("local", True)
+    if local and HOTELS_DATA_PATH_LOCAL.exists() and (HOTELS_DATA_PATH_LOCAL / "hotels.json").exists():
         logger.info(f"Using local hotel data path: {HOTELS_DATA_PATH_LOCAL}")
         return HOTELS_DATA_PATH_LOCAL
-    else:
+    elif HOTELS_DATA_PATH_EXTERNAL.exists() and (HOTELS_DATA_PATH_EXTERNAL / "hotels.json").exists():
         logger.info(f"Using external hotel data path: {HOTELS_DATA_PATH_EXTERNAL}")
         return HOTELS_DATA_PATH_EXTERNAL
-
+    else:
+        logger.error(f"No specific hotel data path configured or files not found, defaulting to local path: {HOTELS_DATA_PATH_LOCAL}")
+        raise FileNotFoundError(
+            f"Hotel data files not found in either path.\n"
+            f"Tried paths:\n"
+            f"  - Local: {HOTELS_DATA_PATH_LOCAL / 'hotels.json'}\n"
+            f"  - External: {HOTELS_DATA_PATH_EXTERNAL / 'hotels.json'}\n"
+            f"Please generate hotel data first:\n"
+            f"cd bookings-db && python src/gen_synthetic_hotels.py --num_hotels 3\n"
+            f"Or copy files to: {HOTELS_DATA_PATH_LOCAL}"
+        )
 # Global variables to cache loaded data and agent
 _hotels_data: Optional[dict] = None
 _hotel_details_text: Optional[str] = None

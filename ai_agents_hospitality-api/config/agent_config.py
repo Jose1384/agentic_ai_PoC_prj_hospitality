@@ -6,6 +6,7 @@ It loads configuration from YAML files and environment variables, with
 environment variables taking precedence over file configuration.
 """
 
+from functools import lru_cache
 import os
 from pathlib import Path
 from typing import Optional
@@ -38,6 +39,7 @@ class AgentConfig:
             raise ValueError(f"Temperature must be between 0.0 and 1.0, got {self.temperature}")
 
 
+@lru_cache()
 def _load_config_file() -> dict:
     """
     Load configuration from YAML file.
