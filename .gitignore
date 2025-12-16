@@ -45,7 +45,7 @@ coverage.xml
 unittest-reports/
 
 # Virtual environments
-#.env
+.env
 .venv/
 venv/
 ENV/
