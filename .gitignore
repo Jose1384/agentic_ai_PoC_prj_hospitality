@@ -116,3 +116,4 @@ doctrees/
 # Project specific
 logs/
 **/output_files/**
+**/vector_store/**

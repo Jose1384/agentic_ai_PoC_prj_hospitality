@@ -75,54 +75,54 @@ When you complete a task, reference the commit like this:
 ### Exercise 0: Simple Agentic Assistant with File Context
 
 #### Phase 1: Setup & Data Preparation
-- [ ] Install LangChain dependencies (`langchain`, `langchain-google-genai`)
-- [ ] Configure Google Gemini API key as environment variable (`AI_AGENTIC_API_KEY`)
-- [ ] Generate synthetic hotel data (3 hotels) using `gen_synthetic_hotels.py`
-- [ ] Verify hotel files are created in `bookings-db/output_files/hotels/`
+- [X] Install LangChain dependencies (`langchain`, `langchain-google-genai`)
+- [X] Configure Google Gemini API key as environment variable (`AI_AGENTIC_API_KEY`)
+- [X] Generate synthetic hotel data (3 hotels) using `gen_synthetic_hotels.py`
+- [X] Verify hotel files are created in `bookings-db/output_files/hotels/`
 
 #### Phase 2: Core Implementation
-- [ ] Create function to load hotel JSON file (`hotels.json`)
-- [ ] Create function to load hotel details markdown (`hotel_details.md`)
-- [ ] Implement `answer_hotel_question()` function with file context
-- [ ] Create ChatPromptTemplate with system prompt for hotel assistant
-- [ ] Build LangChain chain (prompt template + LLM)
+- [X] Create function to load hotel JSON file (`hotels.json`)
+- [X] Create function to load hotel details markdown (`hotel_details.md`)
+- [X] Implement `answer_hotel_question()` function with file context
+- [X] Create ChatPromptTemplate with system prompt for hotel assistant
+- [X] Build LangChain chain (prompt template + LLM)
 
 #### Phase 3: Integration & Testing
-- [ ] Create `handle_hotel_query_simple()` async function for WebSocket API
-- [ ] Test with basic queries (hotel names, addresses, locations)
-- [ ] Test with meal plan queries
-- [ ] Test with room information queries
-- [ ] Verify error handling works correctly
+- [X] Create `handle_hotel_query_simple()` async function for WebSocket API
+- [X] Test with basic queries (hotel names, addresses, locations)
+- [X] Test with meal plan queries
+- [X] Test with room information queries
+- [X] Verify error handling works correctly
 
 #### Phase 4: Documentation & Cleanup
-- [ ] Add code comments and docstrings
-- [ ] Test integration with WebSocket API endpoint
-- [ ] Verify responses are properly formatted
+- [X] Add code comments and docstrings
+- [X] Test integration with WebSocket API endpoint
+- [X] Verify responses are properly formatted
 
 ---
 
 ### Exercise 1: Hotel Details with RAG
 
 #### Phase 1: Setup & Data Preparation
-- [ ] Install RAG dependencies (`langchain-community`, `chromadb`)
-- [ ] Generate full hotel dataset (50 hotels) using `gen_synthetic_hotels.py`
-- [ ] Verify all hotel files are created (JSON, markdown files)
+- [X] Install RAG dependencies (`langchain-community`, `chromadb`)
+- [X] Generate full hotel dataset (50 hotels) using `gen_synthetic_hotels.py`
+- [X] Verify all hotel files are created (JSON, markdown files)
 
 #### Phase 2: Vector Store Creation
-- [ ] Implement document loader for `hotels.json` (JSONLoader)
-- [ ] Implement document loader for `hotel_details.md` (TextLoader)
-- [ ] Implement document loader for `hotel_rooms.md` (TextLoader)
-- [ ] Configure RecursiveCharacterTextSplitter (chunk_size=1000, overlap=200)
-- [ ] Create GoogleGenerativeAIEmbeddings instance
-- [ ] Build ChromaDB vector store from all documents
-- [ ] Persist vector store to disk for reuse
+- [X] Implement document loader for `hotels.json` (JSONLoader)
+- [X] Implement document loader for `hotel_details.md` (TextLoader)
+- [X] Implement document loader for `hotel_rooms.md` (TextLoader)
+- [X] Configure RecursiveCharacterTextSplitter (chunk_size=1000, overlap=200)
+- [X] Create GoogleGenerativeAIEmbeddings instance
+- [X] Build ChromaDB vector store from all documents
+- [X] Persist vector store to disk for reuse
 
 #### Phase 3: RAG Chain Implementation
-- [ ] Create ChatGoogleGenerativeAI LLM instance (gemini-2.5-flash-lite, temperature=0)
-- [ ] Implement RetrievalQA chain with vector store
-- [ ] Design system prompt for hotel assistant context
-- [ ] Configure retrieval parameters (k=5 documents)
-- [ ] Test retrieval quality with sample queries
+- [X] Create ChatGoogleGenerativeAI LLM instance (gemini-2.5-flash-lite, temperature=0)
+- [X] Implement RetrievalQA chain with vector store
+- [X] Design system prompt for hotel assistant context
+- [X] Configure retrieval parameters (k=5 documents)
+- [X] Test retrieval quality with sample queries
 
 #### Phase 4: Agent Implementation
 - [ ] Create hotel details agent function

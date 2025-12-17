@@ -13,5 +13,12 @@ agent:
   # Temperature (0.0 to 1.0)
   temperature: 0
 
+
 hotels:
   local: False
+
+rag:
+  active: True
+  chunk_size: 1000
+  chunk_overlap: 200
+  batch_size: 5
