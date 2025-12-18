@@ -1,0 +1,36 @@
+{
+    // Configuraciones de depuración personalizadas
+    "version": "0.2.0",
+    "configurations": [
+        // main.py launch configuration
+        {
+            "name": "Python: Run main.py (ai_agents_hospitality-api)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/ai_agents_hospitality-api/main.py",
+            "cwd": "${workspaceFolder}/ai_agents_hospitality-api",
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env",
+            "python": "${workspaceFolder}/.venv/bin/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/ai_agents_hospitality-api"
+            },
+            "args": []
+        },
+        // ingest_documents.py launch configuration
+        //{
+        //    "name": "Python: Run ingest_documents.py (ai_agents_hospitality-api)",
+        //    "type": "debugpy",
+        //    "request": "launch",
+        //    "program": "${workspaceFolder}/ai_agents_hospitality-api/scripts/ingest_documents.py",
+        //    "cwd": "${workspaceFolder}/ai_agents_hospitality-api",
+        //    "console": "integratedTerminal",
+        //    "envFile": "${workspaceFolder}/.env",
+        //    "python": "${workspaceFolder}/.venv/bin/python",
+        //    "env": {
+        //        "PYTHONPATH": "${workspaceFolder}/ai_agents_hospitality-api"
+        //    },
+        //    "args": []
+        //}
+    ]
+}

@@ -58,6 +58,7 @@ def answer_hotel_question_rag(user_query: str) -> str:
         logger.info(f"Processing RAG question: {user_query[:100]}...")
 
         result = chain.invoke({"query": user_query})
+        
         return result["result"]
 
     except Exception as e:
@@ -82,7 +83,8 @@ def _create_agent_chain() -> RetrievalQA:
         )
 
     vectorstore = _get_vectorstore()
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 5}) 
+    retriever = vectorstore.as_retriever(
+        search_type="similarity",search_kwargs={"k": 5}) 
 
 
     prompt_template = ChatPromptTemplate.from_messages([("system",
@@ -110,7 +112,6 @@ def _create_agent_chain() -> RetrievalQA:
                            "document_variable_name": "hotel_context"},
         return_source_documents=True,
     )
-# 
 
     return _rag_chain
 

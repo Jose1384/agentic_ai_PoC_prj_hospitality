@@ -132,7 +132,9 @@ async def upsert_documents_chroma(docs):
 
         # Store embeddings
         try:
-            embeddings  = GoogleGenerativeAIEmbeddings(model="gemini-embedding-001", google_api_key= _get_env_value("AI_AGENTIC_API_KEY"))
+            #embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+            #GoogleGenerativeAIEmbeddings(model="gemini-embedding-001", google_api_key= _get_env_value("AI_AGENTIC_API_KEY"))
+            embeddings  = GoogleGenerativeAIEmbeddings(model="text-embedding-004", google_api_key= _get_env_value("AI_AGENTIC_API_KEY"))
             Chroma.from_documents(
                 documents=batch,
                 embedding=embeddings,
@@ -187,7 +189,7 @@ async def upsert_documents_pgvector(docs):
 # -----------------------------
 if __name__ == "__main__":
     print("[INFO] Loading and processing documents...")
-    docs = process_documents()
+    docs = process_documents(HOTELS_DATA_PATH_EXTERNAL)
     print(f"[INFO] Total chunks generados: {len(docs)}")
     if docs:
         asyncio.run(upsert_documents_chroma(docs))

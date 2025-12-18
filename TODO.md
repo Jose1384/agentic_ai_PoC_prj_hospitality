@@ -122,21 +122,21 @@ When you complete a task, reference the commit like this:
 - [X] Implement RetrievalQA chain with vector store
 - [X] Design system prompt for hotel assistant context
 - [X] Configure retrieval parameters (k=5 documents)
-- [X] Test retrieval quality with sample queries
+- [] Test retrieval quality with sample queries
 
 #### Phase 4: Agent Implementation
-- [ ] Create hotel details agent function
+- [X] Create hotel details agent function
 - [ ] Implement query preprocessing (normalization, validation)
 - [ ] Add response formatting (markdown structure)
 - [ ] Handle edge cases (no results, ambiguous queries)
 
 #### Phase 5: Integration & Testing
-- [ ] Integrate RAG agent with WebSocket API
-- [ ] Test with hotel location queries
-- [ ] Test with meal plan and pricing queries
-- [ ] Test with room comparison queries
-- [ ] Verify performance (response time < 10s)
-- [ ] Compare results with Exercise 0 (should be more accurate)
+- [X] Integrate RAG agent with WebSocket API
+- [X] Test with hotel location queries
+- [X] Test with meal plan and pricing queries
+- [X] Test with room comparison queries
+- [X] Verify performance (response time < 10s)
+- [X] Compare results with Exercise 0 (should be more accurate)
 
 #### Phase 6: Optimization
 - [ ] Tune chunk size and overlap if needed
