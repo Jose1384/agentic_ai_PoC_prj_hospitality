@@ -19,7 +19,7 @@ try:
     from langchain_core.prompts import ChatPromptTemplate
 except ImportError:
     # Fallback to old structure (v0.1)
-    from langchain.prompts import ChatPromptTemplate
+    from langchain_classic.prompts import ChatPromptTemplate
 
 try:
     from langchain_google_genai import ChatGoogleGenerativeAI

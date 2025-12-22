@@ -1,18 +1,42 @@
 from langchain_community.agent_toolkits import SQLDatabaseToolkit
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_classic.agents import create_sql_agent
 from util.logger_config import logger
 from config.agent_config import get_agent_config
+import asyncio
 
-# Meta-agente: Orchestrator
-def create_orchestrator_agent():
-    """
-    Crea un agente que decide qué agente interno usar según la query.
-    """
-    global _orchestrator_agent
-    if "_orchestrator_agent" in globals() and _orchestrator_agent is not None:
-        return _orchestrator_agent
+try:
+    # Try new LangChain structure (v0.2+)
+    from langchain_core.prompts import ChatPromptTemplate
+except ImportError:
+    # Fallback to old structure (v0.1)
+    from langchain_classic.prompts import ChatPromptTemplate
 
+
+async def handle_orchestrator(user_query: str) -> str:
+    """oRchestrator agent async wrapper for WebSocket / API usage."""
+    loop = asyncio.get_event_loop()
+    response = await loop.run_in_executor(
+        None, orchestrator_agent, user_query
+    )
+    return response
+
+
+def orchestrator_agent(user_query: str) -> str:
+    """orchestrator agent to route user queries to appropriate agents."""
+    try:
+        chain = _create_orchestrator_chain()
+        logger.info(f"Processing RAG question: {user_query[:100]}...")
+
+        result = chain.invoke({"user_query": user_query})
+        
+        return result.content
+
+    except Exception as e:
+        logger.error("Error processing RAG question", exc_info=True)
+        return f"❌ **Error**: {str(e)}"
+
+
+def _create_orchestrator_chain():
     config = get_agent_config()
 
     llm = ChatGoogleGenerativeAI(
@@ -21,36 +45,25 @@ def create_orchestrator_agent():
         google_api_key=config.api_key
     )
 
-    system_prompt = """
+    prompt_template = ChatPromptTemplate.from_messages([
+        ("system", """
 You are a smart Orchestrator Agent.
-
-You have the following agents available:
+Available agents:
 
 1. Bookings SQL Agent
-   - Specialized in hospitality analytics
-   - Can generate SQL queries for bookings table
-   - Good for questions like "number of bookings", "occupancy rate", "total revenue"
-
 2. RAG Agent
-   - Uses hotel data context for general hotel information
-   - Good for questions about hotel facilities, amenities, locations
 
-Your task:
+Task:
 - Given a user query, decide which agent is the best fit.
 - Only choose one agent.
-- Respond with a JSON containing:
-  {
-      "agent": "Bookings SQL Agent" | "RAG Agent" ,
-      "query": "cleaned query to pass to the chosen agent"
-  }
-- Be concise and deterministic.
-"""
+- Return a JSON with this exact structure (use double curly braces to escape):
+  {{
+      "agent": "Bookings SQL Agent" | "RAG Agent"
+  }}
+"""),
+        ("human", "{user_query}")
+    ])
 
-    _orchestrator_agent = create_sql_agent(
-        llm=llm,
-        toolkit=None,  # No DB needed, it only decides
-        verbose=True,
-        system_prompt=system_prompt
-    )
-
-    return _orchestrator_agent
+    # Devuelve un LLMChain combinando prompt + LLM
+    chain = prompt_template | llm
+    return chain
