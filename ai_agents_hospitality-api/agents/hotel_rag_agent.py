@@ -31,6 +31,8 @@ from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from util.configuration import PROJECT_ROOT
 from util.logger_config import logger
 from config.agent_config import _get_env_value, _load_config_file, get_agent_config
+from langchain_community.vectorstores.pgvector import PGVector
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 # Paths
 HOTELS_DATA_PATH_LOCAL = PROJECT_ROOT / "data" / "hotels"
@@ -87,11 +89,21 @@ def _create_agent_chain() -> RetrievalQA:
     if db_type == "chroma":
         vectorstore = _get_vectorstore()
         retriever = vectorstore.as_retriever(
-        search_type="similarity",search_kwargs={"k": 5}) 
+        search_type="similarity", search_kwargs={"k": 5})
     elif db_type == "pgvector":
-        vectorstore = _get_vectorstore()
+        db_uri = _get_env_value("DB_URI") or settings.get("db_uri")
+        if not db_uri:
+            raise RuntimeError("No se ha definido la variable de entorno DB_URI ni el campo db_uri en la configuración.")
+        
+        #TODO(I): Actualmente langchain con PGvector solo soporta crear sus propias tablas. Habría que usar una implementación customizada
+        embeddings = GoogleGenerativeAIEmbeddings(model="text-embedding-004", google_api_key=_get_env_value("AI_AGENTIC_API_KEY"))
+        vectorstore = PGVector(
+            connection_string=db_uri,
+            embedding_function=embeddings,
+            collection_name="bookings_db"
+        )
         retriever = vectorstore.as_retriever(
-        search_type="similarity",search_kwargs={"k": 5})
+            search_type="similarity", search_kwargs={"k": 5})
 
 
     prompt_template = ChatPromptTemplate.from_messages([("system",
