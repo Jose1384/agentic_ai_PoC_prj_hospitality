@@ -19,9 +19,22 @@ from fastapi.requests import Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+
 from util.logger_config import logger
 from util.configuration import settings, PROJECT_ROOT
 from config.agent_config import _load_config_file
+
+# Import Bookings SQL Agent
+try:
+    from agents.bookings_sql_agent import handle_bookings_sql_query
+    BOOKINGS_SQL_AGENT_AVAILABLE = True
+    logger.info("✅ Bookings SQL Agent loaded successfully")
+except ImportError as e:
+    BOOKINGS_SQL_AGENT_AVAILABLE = False
+    logger.warning(f"Bookings SQL Agent not available (ImportError): {e}")
+except Exception as e:
+    BOOKINGS_SQL_AGENT_AVAILABLE = False
+    logger.warning(f"Error loading Bookings SQL Agent: {e}")
 
 # Import Exercise 0 agent
 EXERCISE_0_AVAILABLE = False
@@ -235,8 +248,21 @@ async def websocket_endpoint(websocket: WebSocket, uuid: str):
                 except json.JSONDecodeError:
                     user_query = data
                 
-                # Get response from Exercise 0 agent or fallback to hardcoded
-                if USE_RAG_AGENT:
+                ## TODO(): CALL orquestion to the appropriate agent
+                
+
+                # Bookings SQL Agent trigger: if query starts with 'sql:' or 'analytics:' or contains 'bookings analytics'
+                if BOOKINGS_SQL_AGENT_AVAILABLE:
+                    try:
+                        logger.info(f"Using Bookings SQL Agent for query: {user_query[:100]}...")
+                        # Remove trigger prefix if present
+                        response_content = await handle_bookings_sql_query(user_query)
+                        logger.info(f"✅ Bookings SQL Agent response generated successfully for {uuid}")
+                    except Exception as e:
+                        logger.error(f"❌ Error in Bookings SQL Agent: {e}", exc_info=True)
+                        logger.warning(f"Falling back to hardcoded response for {uuid}")
+                        response_content = find_matching_response(user_query)
+                elif USE_RAG_AGENT:
                     try:
                         logger.info(f"Using RAG agent for query: {user_query[:100]}...")
                         response_content = await handle_hotel_query_rag(user_query)
@@ -245,7 +271,7 @@ async def websocket_endpoint(websocket: WebSocket, uuid: str):
                         logger.error(f"❌ Error in RAG agent: {e}", exc_info=True)
                         logger.warning(f"Falling back to hardcoded response for {uuid}")
                         response_content = find_matching_response(user_query)
-                if EXERCISE_0_AVAILABLE:
+                elif EXERCISE_0_AVAILABLE:
                     try:
                         logger.info(f"Using Exercise 0 agent for query: {user_query[:100]}...")
                         response_content = await handle_hotel_query_simple(user_query)
