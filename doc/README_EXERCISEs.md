@@ -54,3 +54,23 @@ To work with embeddings and avoid rate limiting, you can use different models:
 # embeddings = GoogleGenerativeAIEmbeddings(model="gemini-embedding-001", google_api_key=_get_env_value("AI_AGENTIC_API_KEY"))
 embeddings = GoogleGenerativeAIEmbeddings(model="text-embedding-004", google_api_key=_get_env_value("AI_AGENTIC_API_KEY"))
 ```
+
+## Exerise 2
+
+### Resumen de cambios realizados en el Ejercicio 2
+
+En este ejercicio se han implementado dos mejoras principales:
+
+1. **Agente SQL para analítica sobre PostgreSQL:**
+   - Se ha creado un agente especializado que permite convertir preguntas en lenguaje natural a consultas SQL sobre la base de datos de reservas hoteleras (PostgreSQL).
+   - El agente es capaz de devolver métricas de negocio como bookings, revenue, occupancy, RevPAR, etc., utilizando únicamente el esquema real de la base de datos.
+
+2. **Orquestador de agentes:**
+   - Se ha modificado el orquestador principal (WebSocket/API) para decidir dinámicamente qué agente debe responder a cada consulta.
+   - Según el tipo de pregunta, el orquestador selecciona entre el agente RAG (para preguntas sobre información textual/documental) o el agente SQL (para analítica estructurada sobre la base de datos).
+   - Esto permite una experiencia unificada y transparente para el usuario final.
+
+**Configuración necesaria:**
+
+- Es imprescindible definir la variable de entorno `DB_URI` con la cadena de conexión a la base de datos PostgreSQL para que el agente SQL funcione correctamente.
+  - Ejemplo: `export DB_URI=postgresql://usuario:password@host:puerto/nombre_db`

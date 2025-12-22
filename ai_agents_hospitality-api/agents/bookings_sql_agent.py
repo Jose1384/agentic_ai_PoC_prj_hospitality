@@ -16,6 +16,7 @@ from langchain_community.utilities import SQLDatabase
 from langchain_community.agent_toolkits import SQLDatabaseToolkit
 from langchain_classic.agents import create_sql_agent
 from langchain_core.prompts import ChatPromptTemplate
+from langchain.tools import tool
 
 try:
     from langchain_google_genai import ChatGoogleGenerativeAI
@@ -77,8 +78,9 @@ def create_bookings_sql_agent():
         google_api_key=config.api_key
     )
 
+    # Define tools
     db = get_database()
-    toolkit = SQLDatabaseToolkit(db=db, llm=llm)
+    toolkit = SQLDatabaseToolkit(db=db, llm=llm) # TODO(0): add more tools for analytics
 
     system_prompt = """
 You are a senior hospitality data analyst.
@@ -114,3 +116,14 @@ Always return SQL compatible with PostgreSQL.
     )
 
     return agent
+
+
+
+# --- DIFINE TOOLS FOR ANALYTICS METRICS CALCULATION ---
+ #TODO(0): Add analysis-specific tools to avoid depending just on toolkit-sql
+@tool
+def calculate_revpar(total_revenue: float, total_available_room_nights: int) -> float:
+        """"Calculate RevPAR given total revenue and total available room-nights."""
+        if total_available_room_nights == 0:
+              return 0.0
+        return total_revenue / total_available_room_nights
