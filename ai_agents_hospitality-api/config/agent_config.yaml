@@ -19,6 +19,8 @@ hotels:
 
 rag:
   active: True
+  db:
+    type: chroma   # Options: chroma, pgvector
   chunk_size: 1000
   chunk_overlap: 200
   batch_size: 10000

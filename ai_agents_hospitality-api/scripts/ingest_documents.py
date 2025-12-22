@@ -1,5 +1,5 @@
 import asyncio
-from xml.dom.minidom import Document
+from entities.embeddings import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_classic.embeddings import CacheBackedEmbeddings
@@ -17,7 +17,7 @@ from langchain_community.document_loaders import (
 from config.agent_config import _get_env_value, _load_config_file
 from util.configuration import PROJECT_ROOT
 from langchain_chroma import Chroma
-
+from db.session_sqlalchemy import DatabaseSessionManager, transaction_db_async
 
 HOTELS_DATA_PATH_LOCAL = PROJECT_ROOT / "data" / "hotels"
 HOTELS_DATA_PATH_EXTERNAL = PROJECT_ROOT.parent / "bookings-db" / "output_files" / "hotels"
@@ -31,7 +31,7 @@ CHROMA_PATH = PROJECT_ROOT / "data" / "chroma" / "hotels"
 # This isn't for production use, but is useful for local
 # -----------------------------
 def _initialize_cache_embeddings():    
-    embeddings  = GoogleGenerativeAIEmbeddings(model="gemini-embedding-001", google_api_key= _get_env_value("AI_AGENTIC_API_KEY"))
+    embeddings  = GoogleGenerativeAIEmbeddings(model="text-embedding-004", google_api_key= _get_env_value("AI_AGENTIC_API_KEY"))
     store = LocalFileStore("cache/")
     return CacheBackedEmbeddings.from_bytes_store(
         embeddings,
@@ -145,10 +145,24 @@ async def upsert_documents_chroma(docs):
             raise
 
 # insert embeddings in pgvector(not tested) 
+
+
+
+# db_manager global para inicialización lazy - not in production
+db_manager = None
 async def upsert_documents_pgvector(docs):
+    global db_manager
     settings = _load_config_file()
     total = len(docs)
     batch_size = settings.get("rag", {}).get("batch_size", 10)
+
+    db_uri_async = _get_env_value("DB_URI_ASYNC")
+    if not db_uri_async:
+        raise RuntimeError("DB_URI_ASYNC was not found in environment variables.")
+
+    if db_manager is None:
+        db_manager = DatabaseSessionManager(db_uri_async)
+
     for i in range(0, total, batch_size):
         batch = docs[i:i + batch_size]
         texts = [d.page_content for d in batch]
@@ -157,10 +171,10 @@ async def upsert_documents_pgvector(docs):
             cached_embedder = _initialize_cache_embeddings()
             embs = cached_embedder.embed_documents(texts)
         except Exception as e:
-            print(f"[ERROR] Generando embeddings batch {i // settings.rag.batch_size + 1}: {e}")
-            raise
+            print(f"[ERROR] Generando embeddings batch {i // batch_size + 1}: {e}")
+            raise e
 
-        async with (transaction_db_async() as db_conn):
+        async with transaction_db_async(db_manager) as db_conn:
             for doc, emb in zip(batch, embs):
                 # UUIDv5 estable por chunk basado en contenido y título
                 content_for_id = f"{doc.metadata.get('title', '')}-{doc.page_content}"
@@ -188,11 +202,19 @@ async def upsert_documents_pgvector(docs):
 # Ingest Pipeline
 # -----------------------------
 if __name__ == "__main__":
+    settings = _load_config_file()
     print("[INFO] Loading and processing documents...")
     docs = process_documents(HOTELS_DATA_PATH_EXTERNAL)
     print(f"[INFO] Total chunks generados: {len(docs)}")
     if docs:
-        asyncio.run(upsert_documents_chroma(docs))
-        print("[INFO] Processing completed. Documents on db")
+        type_db = settings.get("rag", {}).get("db", {}).get("type", "chroma")
+        if type_db == "chroma":
+            print("[INFO] Upserting documents into ChromaDB...")
+            asyncio.run(upsert_documents_chroma(docs))
+            print("[INFO] Processing completed. Documents on ChromaDB")
+        elif type_db == "pgvector":
+            print("[INFO] Upserting documents into pgvector...")
+            asyncio.run(upsert_documents_pgvector(docs))
+            print("[INFO] Processing completed. Documents on pgvector")
     else:
         print("[INFO] No documents were generated to upload.")

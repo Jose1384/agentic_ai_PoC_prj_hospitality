@@ -117,3 +117,4 @@ doctrees/
 logs/
 **/output_files/**
 **/vector_store/**
+**/cache/**

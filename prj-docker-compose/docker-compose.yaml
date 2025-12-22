@@ -28,7 +28,7 @@ services:
       - prj_hospitality-network
 
   bookings-db:
-    image: postgres:15.3
+    image: pgvector/pgvector:pg15
     container_name: bookings-db
     environment:
       POSTGRES_USER: ${POSTGRES_USER}

@@ -82,9 +82,16 @@ def _create_agent_chain() -> RetrievalQA:
             google_api_key=config.api_key
         )
 
-    vectorstore = _get_vectorstore()
-    retriever = vectorstore.as_retriever(
+    settings = _load_config_file()
+    db_type = settings.get("rag", {}).get("db", {}).get("type", "chroma")
+    if db_type == "chroma":
+        vectorstore = _get_vectorstore()
+        retriever = vectorstore.as_retriever(
         search_type="similarity",search_kwargs={"k": 5}) 
+    elif db_type == "pgvector":
+        vectorstore = _get_vectorstore()
+        retriever = vectorstore.as_retriever(
+        search_type="similarity",search_kwargs={"k": 5})
 
 
     prompt_template = ChatPromptTemplate.from_messages([("system",

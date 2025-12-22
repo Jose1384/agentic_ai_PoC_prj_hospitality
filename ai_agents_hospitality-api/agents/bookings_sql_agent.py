@@ -25,7 +25,7 @@ except ImportError:
 
 from util.logger_config import logger
 from config.agent_config import get_agent_config
-from db.db_session import get_database
+from db.session_langchain import get_database
 
 _bookings_sql_agent = None # Lazy singleton instance - do not modify directly, do not use this on production environments
 
