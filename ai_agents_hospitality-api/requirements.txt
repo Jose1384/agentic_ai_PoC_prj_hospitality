@@ -15,6 +15,7 @@ langchain-google-genai>=1.0.0
 langchain-openai>=0.1.0  # For OpenAI-compatible proxy support
 langchain-community>=0.3.30
 langchain-chroma
+langgraph>=0.2.0
 
 
 
